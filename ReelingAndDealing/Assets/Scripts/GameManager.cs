@@ -86,16 +86,15 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         // Alternate between players when a turn ends
         curPlayer = curPlayer == leftPlayer ? rightPlayer : leftPlayer;
+        Debug.Log($"It's now {curPlayer.photonPlayer.NickName}'s turn.");
 
-        if (curPlayer == PlayerController.me)
-        {
-            PlayerController.me.BeginTurn();
-        }
-        else
-        {
-            PlayerController.me.EnableEndTurnButton(false);
-            curPlayer.EnableEndTurnButton(true);
-        }
+
+        // Call BeginTurn for the current player
+        curPlayer.BeginTurn();
+
+        // Update UI for the new current player
+        leftPlayer.EnableEndTurnButton(curPlayer == leftPlayer);
+        rightPlayer.EnableEndTurnButton(curPlayer == rightPlayer);
     }
 
     public void DrawFromSpecificDeck(int deckIndex)

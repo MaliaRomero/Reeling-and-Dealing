@@ -82,7 +82,7 @@ public class PlayerController : MonoBehaviourPun
         DisableTurnUI();
 
         // Notify GameManager to switch to the next player
-        photonView.RPC("SetNextTurn", RpcTarget.MasterClient);
+        GameManager.instance.photonView.RPC("SetNextTurn", RpcTarget.MasterClient);
     }
 
     public void EnableEndTurnButton(bool enable)
