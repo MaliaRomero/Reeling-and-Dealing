@@ -45,9 +45,9 @@ public class PlayerController : MonoBehaviourPun
 
     int GetBaitCost(int deckIndex)
     {
-        // Example of determining bait cost based on deck
         if (deckIndex == 0) return 1; // Deck 1 costs 1 bait
         if (deckIndex == 1) return 2; // Deck 2 costs 2 bait
+        if (deckIndex == 2) return 3;
         return 0; // Default cost
     }
 
@@ -83,6 +83,12 @@ public class PlayerController : MonoBehaviourPun
 
         // Notify GameManager to switch to the next player
         photonView.RPC("SetNextTurn", RpcTarget.MasterClient);
+    }
+
+    public void EnableEndTurnButton(bool enable)
+    {
+        // Assume you have a reference to the End Turn button
+        GameManager.instance.endTurnButton.interactable = enable; // This assumes you have a button set up
     }
 
     void DisableTurnUI()

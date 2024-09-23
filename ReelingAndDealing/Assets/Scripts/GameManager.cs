@@ -27,6 +27,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public TextMeshProUGUI tackleBoxText;
     public Button increaseBaitButton;
+    public Button endTurnButton;
 
     public int playersInGame;
 
@@ -49,6 +50,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         //Add listeners to bait button
         increaseBaitButton.onClick.AddListener(IncreaseBait);
+        endTurnButton.onClick.AddListener(GameManager.instance.EndTurn);
     }
 
     void SetPlayers()
@@ -57,20 +59,29 @@ public class GameManager : MonoBehaviourPunCallbacks
         if (PhotonNetwork.PlayerList.Length >= 2)
         {
             leftPlayer = new PlayerController(); // Replace this with your existing logic to get or instantiate players
-        rightPlayer = new PlayerController(); // Same as above
+            rightPlayer = new PlayerController(); // Same as above
 
-        // Assign player IDs from Photon
-        leftPlayer.photonPlayer = PhotonNetwork.CurrentRoom.GetPlayer(1);
-        rightPlayer.photonPlayer = PhotonNetwork.CurrentRoom.GetPlayer(2);
+            // Assign player IDs from Photon
+            leftPlayer.photonPlayer = PhotonNetwork.CurrentRoom.GetPlayer(1);
+            rightPlayer.photonPlayer = PhotonNetwork.CurrentRoom.GetPlayer(2);
 
             // Initialize each player
             leftPlayer.photonView.RPC("Initialize", RpcTarget.AllBuffered, leftPlayer.photonPlayer);
             rightPlayer.photonView.RPC("Initialize", RpcTarget.AllBuffered, rightPlayer.photonPlayer);
         }
+
+        if (curPlayer == PlayerController.me)
+        {
+            endTurnButton.interactable = true;
+        }
+        else
+        {
+            endTurnButton.interactable = false;
+        }
     }
 
 
-[PunRPC]
+    [PunRPC]
     void SetNextTurn()
     {
         // Alternate between players when a turn ends
@@ -80,12 +91,17 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             PlayerController.me.BeginTurn();
         }
+        else
+        {
+            PlayerController.me.EnableEndTurnButton(false);
+            curPlayer.EnableEndTurnButton(true);
+        }
     }
 
     public void DrawFromSpecificDeck(int deckIndex)
     {
-        //This still kinda confuses me...
-        if (PhotonNetwork.LocalPlayer != GameManager.instance.curPlayer.photonView.Owner)
+        // Only allow the current player to draw
+        if (curPlayer != PlayerController.me)
         {
             Debug.LogError("It's not your turn.");
             return;
@@ -116,6 +132,13 @@ public class GameManager : MonoBehaviourPunCallbacks
             {
                 if (availableCardSlots[i] == true)
                 {
+                    int baitCost = GetBaitCost(deckIndex);
+                    if (PlayerController.me.baitCount < baitCost)
+                    {
+                        Debug.LogError("Not enough bait to draw from this deck!");
+                        return;
+                    }
+
                     randCard.gameObject.SetActive(true);
                     randCard.handIndex = i;
                     randCard.transform.position = cardSlots[i].position;
@@ -123,6 +146,9 @@ public class GameManager : MonoBehaviourPunCallbacks
 
                     //deck.Remove(randCard);
                     selectedDeck.cards.Remove(randCard);
+
+                    PlayerController.me.baitCount -= baitCost;
+                    UpdateBaitUI(PlayerController.me.baitCount);
 
                     return;
                 }
@@ -154,6 +180,26 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
+    int GetBaitCost(int deckIndex)
+    {
+        // Example of determining bait cost based on deck
+        if (deckIndex == 0) return 1; // Deck 1 costs 1 bait
+        if (deckIndex == 1) return 2; // Deck 2 costs 2 bait
+        if (deckIndex == 2) return 3;
+        return 0; // Default cost
+    }
+
+    public void EndTurn()
+    {
+        if (curPlayer != PlayerController.me)
+        {
+            Debug.LogError("It's not your turn!");
+            return;
+        }
+
+        PlayerController.me.EndTurn();
+        SetNextTurn(); // Move to the next player's turn
+    }
 }
 
 
@@ -170,4 +216,4 @@ public class GameManager : MonoBehaviourPunCallbacks
 
             // discardPileText.text = "Discard Pile Size: " + decks[0].discardPile.Count.ToString();
         }
-    }*/
+    } reload*/
