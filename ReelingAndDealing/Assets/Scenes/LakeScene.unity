@@ -7140,6 +7140,7 @@ MonoBehaviour:
   discardPileText: {fileID: 1161405309}
   tackleBoxText: {fileID: 581450544}
   increaseBaitButton: {fileID: 1340136946}
+  endTurnButton: {fileID: 786605372}
   playersInGame: 0
   leftPlayer: {fileID: 0}
   rightPlayer: {fileID: 0}
