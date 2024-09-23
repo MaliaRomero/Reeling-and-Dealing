@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-//multiplayer
 using Photon.Pun;
 using Photon.Realtime;
 using System.Linq;
 
-//multiplayer
 public class GameManager : MonoBehaviourPunCallbacks
 {
-    /// <shttps://www.youtube.com/watch?v=C5bnWShD6ng
 
-    //multiplayer
+    //RESOURCES USED
+    // <shttps://www.youtube.com/watch?v=C5bnWShD6ng
+    // Turn based code- Zenva academy
+
+    //VARIABLES
     public static GameManager instance;
 
     public List<Deck> decks = new List<Deck>();
@@ -23,38 +24,76 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public TextMeshProUGUI deckSizeText;
     public TextMeshProUGUI discardPileText;
+
     public TextMeshProUGUI tackleBoxText;
+    public Button increaseBaitButton;
 
     public int playersInGame;
 
-    //multiplayer
+    public PlayerController leftPlayer;
+    public PlayerController rightPlayer;
+    public PlayerController curPlayer;
+
     void Awake()
     {
-        //instance
         instance = this;
     }
-
-    // Start is called before the first frame update'
+    
     void Start()
     {
-        photonView.RPC("ImInGame", RpcTarget.All);
+        // The master client initializes the players
+        if (PhotonNetwork.IsMasterClient)
+        {
+            SetPlayers();
+        }
+
+        //Add listeners to bait button
+        increaseBaitButton.onClick.AddListener(IncreaseBait);
     }
 
-    [PunRPC]
-    void ImInGame()
+    void SetPlayers()
+    { 
+
+        if (PhotonNetwork.PlayerList.Length >= 2)
+        {
+            leftPlayer = new PlayerController(); // Replace this with your existing logic to get or instantiate players
+        rightPlayer = new PlayerController(); // Same as above
+
+        // Assign player IDs from Photon
+        leftPlayer.photonPlayer = PhotonNetwork.CurrentRoom.GetPlayer(1);
+        rightPlayer.photonPlayer = PhotonNetwork.CurrentRoom.GetPlayer(2);
+
+            // Initialize each player
+            leftPlayer.photonView.RPC("Initialize", RpcTarget.AllBuffered, leftPlayer.photonPlayer);
+            rightPlayer.photonView.RPC("Initialize", RpcTarget.AllBuffered, rightPlayer.photonPlayer);
+        }
+    }
+
+
+[PunRPC]
+    void SetNextTurn()
     {
-        playersInGame++;
+        // Alternate between players when a turn ends
+        curPlayer = curPlayer == leftPlayer ? rightPlayer : leftPlayer;
 
+        if (curPlayer == PlayerController.me)
+        {
+            PlayerController.me.BeginTurn();
+        }
     }
 
-
-    //Handles the specific index of the deck
     public void DrawFromSpecificDeck(int deckIndex)
     {
+        //This still kinda confuses me...
+        if (PhotonNetwork.LocalPlayer != GameManager.instance.curPlayer.photonView.Owner)
+        {
+            Debug.LogError("It's not your turn.");
+            return;
+        }
+
         DrawCard(deckIndex);
     }
 
-    //Draw a card from a deck
     public void DrawCard(int deckIndex)
     {
         //Make sure correct number of decks
@@ -91,6 +130,36 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
+    [PunRPC]
+    public void UpdateDeckUI()
+    {
+        if (decks.Count > 0)
+        {
+            deckSizeText.text = "Remaining in deck 1: " + decks[0].cards.Count.ToString();
+            discardPileText.text = "Discard Pile Size: " + decks[0].discardPile.Count.ToString();
+        }
+    }
+
+    public void UpdateBaitUI(int baitCount)
+    {
+        tackleBoxText.text = "Bait: " + baitCount.ToString();
+    }
+
+    void IncreaseBait()
+    {
+        if (curPlayer == PlayerController.me)
+        {
+            PlayerController.me.baitCount++;
+            PlayerController.me.UpdateBaitUI();
+        }
+    }
+
+}
+
+
+
+
+/* ONLY WORKS SINGLE PLAYER SINGLE DECK
     private void Update()
     {
         if (decks.Count > 0)
@@ -101,5 +170,4 @@ public class GameManager : MonoBehaviourPunCallbacks
 
             // discardPileText.text = "Discard Pile Size: " + decks[0].discardPile.Count.ToString();
         }
-    }
-}
+    }*/
