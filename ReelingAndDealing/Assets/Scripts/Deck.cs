@@ -4,15 +4,8 @@ using UnityEngine;
 
 public class Deck : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public string deckName;
+    public List<Card> cards = new List<Card>();
+    // The discard pile for the deck
+    public List<Card> discardPile = new List<Card>();
 }

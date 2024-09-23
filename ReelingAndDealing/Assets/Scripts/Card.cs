@@ -7,6 +7,8 @@ public class Card : MonoBehaviour
     public bool hasBeenPlayed;
     public int handIndex;
     private GameManager gm;
+    private Deck currentDeck;
+
 
     private void Start()
     {
@@ -20,13 +22,21 @@ public class Card : MonoBehaviour
             transform.position += Vector3.up * 5;
             hasBeenPlayed = true;
             gm.availableCardSlots[handIndex] = true;
-            Invoke("MoveToDiscardPile", 2f);
+            Invoke("MoveToDiscardPile", .5f);
         }
     }
 
+    
     void MoveToDiscardPile()
     {
-        gm.discardPile.Add(this);
-        gameObject.SetActive(false);
+        if (currentDeck != null)
+        {
+            currentDeck.discardPile.Add(this);
+            gameObject.SetActive(false);
+        }
+        else
+        {
+            Debug.LogError("Current deck is not assigned.");
+        }
     }
 }
