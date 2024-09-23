@@ -3,13 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+//multiplayer
+using Photon.Pun;
+using Photon.Realtime;
+using System.Linq;
 
-public class GameManager : MonoBehaviour
+//multiplayer
+public class GameManager : MonoBehaviourPunCallbacks
 {
     /// <shttps://www.youtube.com/watch?v=C5bnWShD6ng
 
-    //public List<Card> deck = new List<Card>();
-    //public List<Card> discardPile = new List<Card>();
+    //multiplayer
+    public static GameManager instance;
 
     public List<Deck> decks = new List<Deck>();
 
@@ -19,6 +24,29 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI deckSizeText;
     public TextMeshProUGUI discardPileText;
     public TextMeshProUGUI tackleBoxText;
+
+    public int playersInGame;
+
+    //multiplayer
+    void Awake()
+    {
+        //instance
+        instance = this;
+    }
+
+    // Start is called before the first frame update'
+    void Start()
+    {
+        photonView.RPC("ImInGame", RpcTarget.All);
+    }
+
+    [PunRPC]
+    void ImInGame()
+    {
+        playersInGame++;
+
+    }
+
 
     //Handles the specific index of the deck
     public void DrawFromSpecificDeck(int deckIndex)
