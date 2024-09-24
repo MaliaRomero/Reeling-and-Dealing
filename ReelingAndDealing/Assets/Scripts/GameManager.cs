@@ -50,7 +50,9 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         //Add listeners to bait button
         increaseBaitButton.onClick.AddListener(IncreaseBait);
-        endTurnButton.onClick.AddListener(GameManager.instance.EndTurn);
+        //endTurnButton.onClick.AddListener(GameManager.instance.EndTurn);
+        endTurnButton.onClick.AddListener(EndTurn);
+
     }
 
     void SetPlayers()
@@ -61,13 +63,12 @@ public class GameManager : MonoBehaviourPunCallbacks
             leftPlayer = new PlayerController();
             rightPlayer = new PlayerController();
 
-            // Assign player IDs from Photon
-            leftPlayer.photonPlayer = PhotonNetwork.CurrentRoom.GetPlayer(1);
-            rightPlayer.photonPlayer = PhotonNetwork.CurrentRoom.GetPlayer(2);
+            leftPlayer.photonPlayer = PhotonNetwork.PlayerList[0];
+            rightPlayer.photonPlayer = PhotonNetwork.PlayerList[1];
 
             // Initialize each player
-            leftPlayer.photonView.RPC("Initialize", RpcTarget.AllBuffered, leftPlayer.photonPlayer);
-            rightPlayer.photonView.RPC("Initialize", RpcTarget.AllBuffered, rightPlayer.photonPlayer);
+            //leftPlayer.photonView.RPC("Initialize", RpcTarget.AllBuffered, leftPlayer.photonPlayer);
+            //rightPlayer.photonView.RPC("Initialize", RpcTarget.AllBuffered, rightPlayer.photonPlayer);
 
         }
 
@@ -77,6 +78,21 @@ public class GameManager : MonoBehaviourPunCallbacks
             curPlayer = leftPlayer;  // Assign leftPlayer as the current player
         }
 
+        /*
+        if (curPlayer == PlayerController.me)
+        {
+            endTurnButton.interactable = true;
+        }
+        else
+        {
+            endTurnButton.interactable = false;
+        }*/
+
+        UpdateEndTurnButton();
+    }
+
+    void UpdateEndTurnButton()
+    {
         if (curPlayer == PlayerController.me)
         {
             endTurnButton.interactable = true;
@@ -86,7 +102,6 @@ public class GameManager : MonoBehaviourPunCallbacks
             endTurnButton.interactable = false;
         }
     }
-
 
     [PunRPC]
     void SetNextTurn()
@@ -100,8 +115,9 @@ public class GameManager : MonoBehaviourPunCallbacks
         curPlayer.BeginTurn();
 
         // Update UI for the new current player
-        leftPlayer.EnableEndTurnButton(curPlayer == leftPlayer);
-        rightPlayer.EnableEndTurnButton(curPlayer == rightPlayer);
+        //leftPlayer.EnableEndTurnButton(curPlayer == leftPlayer);
+        //rightPlayer.EnableEndTurnButton(curPlayer == rightPlayer);
+        UpdateEndTurnButton();
     }
 
     public void DrawFromSpecificDeck(int deckIndex)
@@ -172,6 +188,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
+    [PunRPC]
     public void UpdateBaitUI(int baitCount)
     {
         tackleBoxText.text = "Bait: " + baitCount.ToString();
@@ -203,23 +220,11 @@ public class GameManager : MonoBehaviourPunCallbacks
             return;
         }
 
+        endTurnButton.interactable = false;  // Disable button immediately
         PlayerController.me.EndTurn();
-        SetNextTurn(); // Move to the next player's turn
+
+        photonView.RPC("SetNextTurn", RpcTarget.AllBuffered);
     }
+
+
 }
-
-
-
-
-/* ONLY WORKS SINGLE PLAYER SINGLE DECK
-    private void Update()
-    {
-        if (decks.Count > 0)
-        {
-            // Example: Display the size of the first deck
-            deckSizeText.text = "Remaining in deck 1: " + decks[0].cards.Count.ToString();
-            discardPileText.text = "Discard Pile Size: " + decks[0].discardPile.Count.ToString();
-
-            // discardPileText.text = "Discard Pile Size: " + decks[0].discardPile.Count.ToString();
-        }
-    } reload*/

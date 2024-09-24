@@ -4,7 +4,7 @@ using Photon.Pun;
 public class PlayerController : MonoBehaviourPun
 {
     public Photon.Realtime.Player photonPlayer;
-    public bool isMyTurn = false;
+    //public bool isMyTurn = false;
     public static PlayerController me;
 
     public int baitCount;
@@ -25,7 +25,7 @@ public class PlayerController : MonoBehaviourPun
     //-----------START PLAYERS TURN----------
     public void BeginTurn()
     {
-        isMyTurn = true;
+        //isMyTurn = true;
         EnableTurnUI();
         UpdateBaitUI();
     }
@@ -70,25 +70,23 @@ public class PlayerController : MonoBehaviourPun
 
 
     //------------END PLAYERS TURN------------------------
+
+    /*
+    public void EnableEndTurnButton(bool enable)
+    {
+        // Assume you have a reference to the End Turn button
+        GameManager.instance.endTurnButton.interactable = enable; // This assumes you have a button set up
+    }*/
+
     public void EndTurn()
     {
-        if (!isMyTurn)
+        if (this != PlayerController.me)
         {
             Debug.LogError("It's not your turn!");
             return;
         }
 
-        isMyTurn = false;
         DisableTurnUI();
-
-        // Notify GameManager to switch to the next player
-        GameManager.instance.photonView.RPC("SetNextTurn", RpcTarget.MasterClient);
-    }
-
-    public void EnableEndTurnButton(bool enable)
-    {
-        // Assume you have a reference to the End Turn button
-        GameManager.instance.endTurnButton.interactable = enable; // This assumes you have a button set up
     }
 
     void DisableTurnUI()
@@ -96,10 +94,10 @@ public class PlayerController : MonoBehaviourPun
         Debug.Log("Your turn has ended.");
         // Disable buttons, cards, etc.
     }
-
+    /*
     //------------GET NEXT PLAYER---------------------------
     public PlayerController GetOtherPlayer()
     {
         return this == GameManager.instance.leftPlayer ? GameManager.instance.rightPlayer : GameManager.instance.leftPlayer;
-    }
+    }*/
 }
