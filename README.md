@@ -3,10 +3,15 @@
 https://maliaromero.github.io/Reeling-and-Dealing/
 
 Updated changes:
--Make a deck of fish cards
 
--Make a visible hand
+-Allow drawing from multiple decks
 
--When draw button selected, add fish into hand
+-Working UI bait counter
 
--Semi-working discard pile
+-Have bait increase with bait button
+
+-Have bait decrease depending on pile drawn from
+
+-Working multiplayer menu/lobby
+
+-Attempted multiplayer turns....
