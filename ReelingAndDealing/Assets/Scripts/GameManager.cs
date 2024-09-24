@@ -58,8 +58,8 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.PlayerList.Length >= 2)
         {
-            leftPlayer = new PlayerController(); // Replace this with your existing logic to get or instantiate players
-            rightPlayer = new PlayerController(); // Same as above
+            leftPlayer = new PlayerController();
+            rightPlayer = new PlayerController();
 
             // Assign player IDs from Photon
             leftPlayer.photonPlayer = PhotonNetwork.CurrentRoom.GetPlayer(1);
@@ -68,6 +68,13 @@ public class GameManager : MonoBehaviourPunCallbacks
             // Initialize each player
             leftPlayer.photonView.RPC("Initialize", RpcTarget.AllBuffered, leftPlayer.photonPlayer);
             rightPlayer.photonView.RPC("Initialize", RpcTarget.AllBuffered, rightPlayer.photonPlayer);
+
+        }
+
+        //If no current player set, set it as the left player.
+        if (curPlayer == null)
+        {
+            curPlayer = leftPlayer;  // Assign leftPlayer as the current player
         }
 
         if (curPlayer == PlayerController.me)
