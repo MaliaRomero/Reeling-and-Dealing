@@ -32,7 +32,8 @@ public class PlayerController : MonoBehaviourPun
 
     public void UpdateBaitUI()
     {
-        GameManager.instance.UpdateBaitUI(baitCount);
+        //GameManager.instance.UpdateBaitUI(baitCount);
+        GameManager.instance.tackleBoxText.text = "Bait: " + baitCount.ToString();
     }
 
     void EnableTurnUI()
@@ -43,7 +44,7 @@ public class PlayerController : MonoBehaviourPun
 
     //-------------PLAYER ACTIONS-------------------------
 
-    int GetBaitCost(int deckIndex)
+     public int GetBaitCost(int deckIndex)
     {
         if (deckIndex == 0) return 1; // Deck 1 costs 1 bait
         if (deckIndex == 1) return 2; // Deck 2 costs 2 bait
@@ -53,12 +54,14 @@ public class PlayerController : MonoBehaviourPun
 
     public void DrawCard(int deckIndex)
     {
-        int baitCost = GetBaitCost(deckIndex);
+        //int baitCost = GetBaitCost(deckIndex);
+        int baitCost = GameManager.instance.GetBaitCost(deckIndex);
 
         if (baitCount >= baitCost)
         {
             baitCount -= baitCost;
-            GameManager.instance.DrawCard(deckIndex);  // Calls GameManager to handle the actual draw
+            GameManager.instance.photonView.RPC("DrawCard", RpcTarget.MasterClient, deckIndex);
+            //GameManager.instance.DrawCard(deckIndex);  // Calls GameManager to handle the actual draw
         }
         else
         {

@@ -29,8 +29,6 @@ public class GameManager : MonoBehaviourPunCallbacks
     public Button increaseBaitButton;
     public Button endTurnButton;
 
-    public int playersInGame;
-
     public PlayerController leftPlayer;
     public PlayerController rightPlayer;
     public PlayerController curPlayer;
@@ -72,11 +70,14 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         }
 
-        //If no current player set, set it as the left player.
+        //If no current player set, set it as the left player
+        /*
         if (curPlayer == null)
         {
             curPlayer = leftPlayer;  // Assign leftPlayer as the current player
-        }
+        }*/
+
+        curPlayer = leftPlayer;    
 
         /*
         if (curPlayer == PlayerController.me)
@@ -93,6 +94,12 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     void UpdateEndTurnButton()
     {
+        if (curPlayer == null || endTurnButton == null)
+        {
+            Debug.LogError("curPlayer or endTurnButton is null");
+            return;
+        }
+
         if (curPlayer == PlayerController.me)
         {
             endTurnButton.interactable = true;
@@ -129,7 +136,9 @@ public class GameManager : MonoBehaviourPunCallbacks
             return;
         }
 
-        DrawCard(deckIndex);
+        //DrawCard(deckIndex);
+        photonView.RPC("DrawCard", RpcTarget.MasterClient, deckIndex);
+
     }
 
     public void DrawCard(int deckIndex)
@@ -155,7 +164,8 @@ public class GameManager : MonoBehaviourPunCallbacks
                 if (availableCardSlots[i] == true)
                 {
                     int baitCost = GetBaitCost(deckIndex);
-                    if (PlayerController.me.baitCount < baitCost)
+                    //if (PlayerController.me.baitCount < baitCost)
+                    if (curPlayer.baitCount < baitCost)
                     {
                         Debug.LogError("Not enough bait to draw from this deck!");
                         return;
@@ -169,8 +179,10 @@ public class GameManager : MonoBehaviourPunCallbacks
                     //deck.Remove(randCard);
                     selectedDeck.cards.Remove(randCard);
 
-                    PlayerController.me.baitCount -= baitCost;
-                    UpdateBaitUI(PlayerController.me.baitCount);
+                    //PlayerController.me.baitCount -= baitCost;
+                    //UpdateBaitUI(PlayerController.me.baitCount);
+                    curPlayer.baitCount -= baitCost;
+                    curPlayer.UpdateBaitUI();
 
                     return;
                 }
@@ -203,7 +215,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
-    int GetBaitCost(int deckIndex)
+    public int GetBaitCost(int deckIndex)
     {
         // Example of determining bait cost based on deck
         if (deckIndex == 0) return 1; // Deck 1 costs 1 bait
@@ -221,8 +233,8 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
 
         endTurnButton.interactable = false;  // Disable button immediately
-        PlayerController.me.EndTurn();
-
+        //PlayerController.me.EndTurn();
+        curPlayer.EndTurn();
         photonView.RPC("SetNextTurn", RpcTarget.AllBuffered);
     }
 
